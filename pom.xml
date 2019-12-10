@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>nl.tudelft.alg</groupId>
+  <artifactId>fcc</artifactId>
+  <version>1.0.0</version>
+  <name>Flexible Car Charging</name>
+  <dependencies>
+  	<dependency>
+  		<groupId>nl.tudelft.alg</groupId>
+  		<artifactId>MipSolverGLPK</artifactId>
+  		<version>1.0.0</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>nl.tudelft.alg</groupId>
+  		<artifactId>GurobiSolver</artifactId>
+  		<version>1.0.0</version>
+  	</dependency>
+<dependency>
+    <groupId>org.ojalgo</groupId>
+    <artifactId>ojalgo</artifactId>
+    <version>47.2.0</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-math3</artifactId>
+    <version>3.6.1</version>
+</dependency>
+<dependency>
+    <groupId>org.ini4j</groupId>
+    <artifactId>ini4j</artifactId>
+    <version>0.5.4</version>
+</dependency>
+  </dependencies>
+      <properties>
+  	<maven.compiler.source>1.8</maven.compiler.source>
+  	<maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+</project>
