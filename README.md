@@ -2,6 +2,8 @@
 Author: Koos van der Linden, 
 Delft University of Technology   
 
+Contributors: Mathijs de Weerdt, Natalia Romero, German Morales
+
 B-FELSA is a framework for benchmarking flexible electric load scheduling algorithms.
 If you use this framework, please cite the following paper:
 
