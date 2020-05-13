@@ -1,10 +1,22 @@
-PTU data is from ERCOT (http://www.ercot.com/mktrules/pilots/frrs)
-Scenario order is 01-01-2016 - 11-06-2016, 01-07-2015 - 11-12-2015 [Data is only available for those months, and the first eleven days of those months]
+# ERCOT scenario data #
+This folder contains scenario data from the Electric Reliability Council of Texas electricity (ERCOT). The data is based on data from 2015-2016. This data is reformatted to make 52 'hypothetical' scenario's of five days long, that all start at 01/04/2016 and end at 05/04/2016.
+
+## Description of the files ##
+* `price_up/down.csv`: the imbalance prices up and down. 
+* `cprice_up/down.csv`: the capacity reserve prices up and down. 
+* `da.csv`: the day ahead market prices (one scenario, from 2016).
+* `ptu_up/down.csv`: the reserve usage up and down.
+* `AP_up/down.csv` and `ER_up/down.csv`. These files are used by the Linear Approximation method. They contain the coefficients for the piece-wise linear functions that describe the Expected Return (ER) and the Acceptance Probability (AP). These values are obtained by a script. The script is available on request.
+
+## References ##
+1. ERCOT, Market information, http://www.ercot.com/mktinfo/, 2015-2016, Accessed: 2018-02-27.
+2. ERCOT, Fast responding regulation service pilot, http://www.ercot.com/mktrules/pilots/frrs, 2016, Accessed: 2018-03-14.
+
+## Scenario's ##
+The scenario's in the files are not in the logical order. The scenario order is 01-01-2016 - 11-06-2016, 01-07-2015 - 11-12-2015 [Data is only available for those months, and the first eleven days of those months].
 Every scenario consists of two days - weekends are also taken into account. After the two days, the two days are repeated to make one week
 
-minute data is copied from 'april' 
-
-Price-data is from ercot, all weekdays in 2016
+### Scenario order ###
 S1  4/4  - 8/4
 S2  11/4 - 15/4
 S3  18/4 - 22/4
