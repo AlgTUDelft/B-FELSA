@@ -1,6 +1,5 @@
 package nl.tudelft.alg.fcc.solution.mip;
 
-import nl.tudelft.alg.MipSolverCore.IMIPSolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.MipSolverCore.VarType;
@@ -111,8 +110,8 @@ public class DeterministicModel extends FlexibleLoadMIPcon {
 
 	//Write the model solution back to the problem instance
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
-		super.writeSolution(solver);
+	public void writeSolution() throws SolverException {
+		super.writeSolution();
 		DecisionVariables d = problem.getVars();
 		writeVarsBack(rcu_bid, d.rcu);
 		writeVarsBack(rcd_bid, d.rcd);

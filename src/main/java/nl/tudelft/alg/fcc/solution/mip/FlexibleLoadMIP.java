@@ -1,7 +1,6 @@
 package nl.tudelft.alg.fcc.solution.mip;
 
 
-import nl.tudelft.alg.MipSolverCore.IMIPSolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.MIP;
 import nl.tudelft.alg.MipSolverCore.SolverException;
@@ -214,7 +213,7 @@ public abstract class FlexibleLoadMIP extends MIP {
 	}
 	
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
+	public void writeSolution() throws SolverException {
 		DecisionVariables d = problem.getVars();
 		writeVarsBack(pimb, d.pimb);
 		if(getMarket().hasDayAhead())

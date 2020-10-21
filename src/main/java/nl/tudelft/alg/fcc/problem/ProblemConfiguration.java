@@ -46,6 +46,7 @@ public class ProblemConfiguration implements Cloneable {
 	String solutionFile;
 	int fileOutput;
 	String modelSetting;
+	String scenarioSelectionMethod;
 	 
 
 	public ProblemConfiguration() { }
@@ -240,6 +241,10 @@ public class ProblemConfiguration implements Cloneable {
 	
 	public String getModelSetting() {
 		return this.modelSetting;
+	}
+	
+	public String getScenarioSelectionMethod() {
+		return scenarioSelectionMethod;
 	}
 	
 	@Override

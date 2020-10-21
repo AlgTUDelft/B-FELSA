@@ -279,8 +279,8 @@ public class ClusterModel implements ConstraintGenerator {
 	}
 	
 	public void fixClusterVariables(double[][] fd, double[][] fu) {
-		if (nDClusters > 0) mip.fixVariable(this.fd, fd);
-		if (nUClusters > 0) mip.fixVariable(this.fu, fu);
+		if (nDClusters > 0) mip.fixVariable(this.fd, fd, CMP.SMALLEREQ);
+		if (nUClusters > 0) mip.fixVariable(this.fu, fu, CMP.SMALLEREQ);
 	}
 
 

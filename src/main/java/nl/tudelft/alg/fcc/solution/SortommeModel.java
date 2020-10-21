@@ -2,6 +2,7 @@ package nl.tudelft.alg.fcc.solution;
 
 import java.util.Arrays;
 
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.fcc.model.Loads;
 import nl.tudelft.alg.fcc.problem.DecisionVariables;
@@ -32,7 +33,7 @@ public class SortommeModel implements ISolveModel{
 	}
 
 	@Override
-	public void initialize() throws SolverException {
+	public void initialize(ISolver solver) throws SolverException {
 		calcDA = problem.getMarket().hasDayAhead() && !problem.getConfig().isDayAheadFixed();
 	}
 

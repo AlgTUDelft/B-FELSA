@@ -1,7 +1,6 @@
 package nl.tudelft.alg.fcc.solution.mip;
 
 import nl.tudelft.alg.MipSolverCore.CMP;
-import nl.tudelft.alg.MipSolverCore.IMIPSolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.MipSolverCore.VarType;
@@ -242,8 +241,8 @@ public class LinApproxModel extends FlexibleLoadMIP {
 
 	//Write the model solution back to the problem instance
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
-		super.writeSolution(solver);
+	public void writeSolution() throws SolverException {
+		super.writeSolution();
 		Loads loads = getLoads();
 		DecisionVariables d = problem.getVars();
 		for(int i=0; i < nLoads; i++) {

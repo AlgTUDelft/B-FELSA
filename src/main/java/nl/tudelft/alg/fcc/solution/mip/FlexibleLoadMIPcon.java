@@ -1,6 +1,5 @@
 package nl.tudelft.alg.fcc.solution.mip;
 
-import nl.tudelft.alg.MipSolverCore.IMIPSolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.MipSolverCore.VarType;
@@ -47,8 +46,8 @@ public abstract class FlexibleLoadMIPcon extends FlexibleLoadMIP {
 	}
 
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
-		super.writeSolution(solver);
+	public void writeSolution() throws SolverException {
+		super.writeSolution();
 		DecisionVariables d = problem.getVars();
 		writeVarsBack(pc, d.p);
 		if(getConfig().considerV2G())

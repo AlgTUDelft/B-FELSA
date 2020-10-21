@@ -42,11 +42,11 @@ public class Config {
 			nTests, startEvaluationScenario, evaluationScenario, nEvaluationScenarios, verbose, fileOutput;
 	public String workingDirectory, outputFolder, mipLogFile, mipDebugFile, experimentType, clusterMethod, reservesSettlement, evStateFile, gridFile,
 			startdatestring, dateformat, pricedataFolder, model, mipsolver, output,
-			generatorType, realizationType, gradient, reservesMarketClearance, solutionFile, modelSetting, markovDownFile, markovUpFile;
+			generatorType, realizationType, gradient, reservesMarketClearance, solutionFile, modelSetting, markovDownFile, markovUpFile, scenarioSelectionMethod;
 	public boolean randomScenarios, V2G, capacityPayment, capacityMarket,
-			dayAhead, imbalance, reserves, grid, quantityOnly, perMinute, mipDebug, semiStochastic;
+			dayAhead, dayAheadSeperate, imbalance, reserves, grid, quantityOnly, perMinute, mipDebug, semiStochastic;
 	public double robustness, minBid, desiredProbabilityOfAcceptance,
-			mipTimeLimit, mipGap, ptu, batteryDegradation, scenarioFactor;
+			mipTimeLimit, subTimeLimit, mipGap, ptu, batteryDegradation, scenarioFactor;
 	public ArimaConfig downConfig, upConfig;
 	public MarkovConfig markovDownConfig, markovUpConfig;
 
@@ -108,7 +108,7 @@ public class Config {
 			if (model.equals("IRD")) desiredProbabilityOfAcceptance = Double.parseDouble(split[1]);
 			if (model.equals("IRD") && split.length > 2) semiStochastic = split[2].equalsIgnoreCase("S");
 			modelSetting = String.join("-", Arrays.copyOfRange(split, 1, split.length));
-		}
+		} else modelSetting = "";
 		split = generatorType.split(" ");
 		generatorType = split[0];
 		if (split.length > 2) {
@@ -321,10 +321,12 @@ public class Config {
 		addSetting("fixedPTUs", "number of fixed PTUs", 0); //TODO
 		addSetting("experimentType", "experiment type", "Rolling horizon");
 		addSetting("randomScenarios", "random scenarios", false);
+		addSetting("scenarioSelectionMethod", "scenario selection method", "FFS");
 		addSetting("V2G", "V2G", true);
 		addSetting("capacityPayment", "capacity payments", true);
 		addSetting("capacityMarket", "capacity market", "field/capacity payments");
 		addSetting("dayAhead", "day ahead", true);
+		addSetting("dayAheadSeperate", "day ahead seperate", true);
 		addSetting("imbalance", "imbalance", true);
 		addSetting("reserves", "reserves", true);
 		addSetting("grid", "grid", false);
@@ -351,6 +353,7 @@ public class Config {
 		addSetting("mipDebug", "mip debug", false);
 		addSetting("verbose", "verbose", 5);
 		addSetting("mipTimeLimit", "mip time limit", Double.POSITIVE_INFINITY);
+		addSetting("subTimeLimit", "sub time limit", Double.POSITIVE_INFINITY);
 		addSetting("mipGap", "mip gap", 1e-6);
 		addSetting("mipsolver", "mip solver", "gurobi");
 		addSetting("output", "output", "average");

@@ -22,9 +22,7 @@ public class FlexibleLoadProblem implements IProblem, Cloneable {
 	
 	//Parameters
 	int startT, 	//the offset in time (expressed as a PTU number). Offset is measured against the start date of the price (and other) data
-		nTimeSteps, //the number of time steps in the problem
-		nUClusters,  //the number of maximum clusters by up res
-		nDClusters;  //the number of maximum clusters by down res
+		nTimeSteps; //the number of time steps in the problem
 
 	/**
 	 * Initialize the problem with price data and with EVstates

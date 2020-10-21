@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.fcc.problem.DecisionVariables;
 import nl.tudelft.alg.fcc.problem.FlexibleLoadProblem;
@@ -25,7 +26,7 @@ public class SolveFromFile implements ISolveModel {
 	}
 
 	@Override
-	public void initialize() throws SolverException {
+	public void initialize(ISolver solver) throws SolverException {
 		try {
 			solution = CSVReader.readCsvFile(problem.getConfig().getSolutionFile());
 		} catch (FileNotFoundException e) {

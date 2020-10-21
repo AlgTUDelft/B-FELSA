@@ -1,25 +1,26 @@
-package nl.tudelft.alg.fcc.utils;
+package nl.tudelft.alg.fcc.simulator.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import nl.tudelft.alg.MipSolverCore.CMP;
 import nl.tudelft.alg.MipSolverCore.Constraint;
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.MIP;
+import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.MipSolverCore.VarType;
 import nl.tudelft.alg.MipSolverCore.Variable;
 import nl.tudelft.alg.fcc.model.PriceScenarioData;
+import nl.tudelft.alg.fcc.utils.Utils;
+
 
 public class ScenarioSelector extends MIP {
-	public static Map<Integer, Map<Integer, ScenarioSelection>> cache = new HashMap<>();
 	PriceScenarioData data; // the problem that is solved by this model
 	Variable[] x; // the selected scenarios
 	Variable[][] e,f; // the errors on average and standard deviation
-	int totalScenarios, nScenarios, startT, nTimeSteps;
+	int totalScenarios, nScenarios, nTimeSteps;
 	static enum TYPE {
 		CAPUPPOS,CAPUPNEG,
 		CAPDOWNPOS, CAPDOWNNEG,
@@ -30,19 +31,19 @@ public class ScenarioSelector extends MIP {
 	ScenarioSelection selection;
 	
 	
-	public ScenarioSelector(PriceScenarioData data, int nScenarios, ScenarioSelection selection, int startT, int endT) {
+	public ScenarioSelector(PriceScenarioData data, int nScenarios) {
 		super();
 		this.data = data;
 		this.nScenarios = nScenarios;
 		this.totalScenarios = data.getNScenarios();
-		this.startT = startT;
-		this.nTimeSteps = endT - startT;
-		this.selection = selection;
+		this.nTimeSteps = data.getNTimeSteps();
+		this.selection = new ScenarioSelection();
 		initiliazeVars();
 		setVars();
 		setObjectiveFunction();
 		setConstraints();
 	}
+
 
 	@Override
 	protected void setConstraints() {
@@ -52,11 +53,10 @@ public class ScenarioSelector extends MIP {
 		double[] stdimbup = new double[nTimeSteps];
 		for(int t=0; t<nTimeSteps; t++) {
 			for(int i=0; i<totalScenarios; i++) {
-				stdcapdown[t] += Math.pow(data.getCapDownPrice(startT + t, i) -
-						data.getExpectedCapDownPrice(startT + t), 2);
-				stdcapup[t] += Math.pow(data.getCapUpPrice(startT + t, i) - data.getExpectedCapUpPrice(startT + t), 2);
-				stdimbdown[t] += Math.pow(data.getDownPrice(startT + t, i) - data.getExpectedDownPrice(startT + t), 2);
-				stdimbup[t] += Math.pow(data.getUpPrice(startT + t, i) - data.getExpectedUpPrice(startT + t), 2);
+				stdcapdown[t] += Math.pow(data.getCapDownPrice(t, i) - data.getExpectedCapDownPrice(t), 2);
+				stdcapup[t] += Math.pow(data.getCapUpPrice(t, i) - data.getExpectedCapUpPrice(t), 2);
+				stdimbdown[t] += Math.pow(data.getDownPrice(t, i) - data.getExpectedDownPrice(t), 2);
+				stdimbup[t] += Math.pow(data.getUpPrice(t, i) - data.getExpectedUpPrice(t), 2);
 			}
 			stdcapdown[t] = stdcapdown[t] / (totalScenarios-1);
 			stdcapup[t] = stdcapup[t] / (totalScenarios-1);
@@ -74,35 +74,31 @@ public class ScenarioSelector extends MIP {
 			//Minimizing the error in the capacity down price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i], data.getCapDownPrice(startT + t, i) / nScenarios);
+				left.addTerm(x[i], data.getCapDownPrice(t, i) / nScenarios);
 			}
-			right = new LinExp(e[TYPE.CAPDOWNPOS.ordinal()][t], -1.0, e[TYPE.CAPDOWNNEG.ordinal()][t],
-					data.getExpectedCapDownPrice(startT + t));
+			right = new LinExp(e[TYPE.CAPDOWNPOS.ordinal()][t], -1.0, e[TYPE.CAPDOWNNEG.ordinal()][t], data.getExpectedCapDownPrice(t));
 			constraints.add(new Constraint(left, right, CMP.EQ, "ACDP"+t));
 			//Minimizing the error in the capacity up price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i], data.getCapUpPrice(startT + t, i) / nScenarios);
+				left.addTerm(x[i], data.getCapUpPrice(t, i) / nScenarios);
 			}
-			right = new LinExp(e[TYPE.CAPUPPOS.ordinal()][t], -1.0, e[TYPE.CAPUPNEG.ordinal()][t],
-					data.getExpectedCapUpPrice(startT + t));
+			right = new LinExp(e[TYPE.CAPUPPOS.ordinal()][t], -1.0, e[TYPE.CAPUPNEG.ordinal()][t], data.getExpectedCapUpPrice(t));
 			constraints.add(new Constraint(left, right, CMP.EQ, "ACUP"+t));
 			
 			//Minimizing the error in the imbalance down price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i], data.getDownPrice(startT + t, i) / nScenarios);
+				left.addTerm(x[i], data.getDownPrice(t, i) / nScenarios);
 			}
-			right = new LinExp(e[TYPE.IMBDOWNPOS.ordinal()][t], -1.0, e[TYPE.IMBDOWNNEG.ordinal()][t],
-					data.getExpectedDownPrice(startT + t));
+			right = new LinExp(e[TYPE.IMBDOWNPOS.ordinal()][t], -1.0, e[TYPE.IMBDOWNNEG.ordinal()][t], data.getExpectedDownPrice(t));
 			constraints.add(new Constraint(left, right, CMP.EQ, "AIDP"+t));
 			//Minimizing the error in the imbalance up price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i], data.getUpPrice(startT + t, i) / nScenarios);
+				left.addTerm(x[i], data.getUpPrice(t, i) / nScenarios);
 			}
-			right = new LinExp(e[TYPE.IMBUPPOS.ordinal()][t], -1.0, e[TYPE.IMBUPNEG.ordinal()][t],
-					data.getExpectedUpPrice(startT + t));
+			right = new LinExp(e[TYPE.IMBUPPOS.ordinal()][t], -1.0, e[TYPE.IMBUPNEG.ordinal()][t], data.getExpectedUpPrice(t));
 			constraints.add(new Constraint(left, right, CMP.EQ, "AIUP"+t));
 			
 			///////////////////////////////////////
@@ -112,17 +108,14 @@ public class ScenarioSelector extends MIP {
 			//Minimizing the error in the capacity down price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i],
-						Math.pow(data.getCapDownPrice(startT + t, i) - data.getExpectedCapDownPrice(startT + t), 2)
-								/ (nScenarios - 1));
+				left.addTerm(x[i], Math.pow(data.getCapDownPrice(t, i) - data.getExpectedCapDownPrice(t),2) / (nScenarios-1));
 			}
 			right = new LinExp(f[TYPE.CAPDOWNPOS.ordinal()][t], -1.0, f[TYPE.CAPDOWNNEG.ordinal()][t], stdcapdown[t]);
 			constraints.add(new Constraint(left, right, CMP.EQ, "DCDP"+t));
 			//Minimizing the error in the capacity up price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i], Math.pow(data.getCapUpPrice(startT + t, i) - data.getExpectedCapUpPrice(startT + t), 2)
-						/ (nScenarios - 1));
+				left.addTerm(x[i], Math.pow(data.getCapUpPrice(t, i) - data.getExpectedCapUpPrice(t),2) / (nScenarios-1));
 			}
 			right = new LinExp(f[TYPE.CAPUPPOS.ordinal()][t], -1.0, f[TYPE.CAPUPNEG.ordinal()][t], stdcapup[t]);
 			constraints.add(new Constraint(left, right, CMP.EQ, "DCUP"+t));
@@ -130,16 +123,14 @@ public class ScenarioSelector extends MIP {
 			//Minimizing the error in the imbalance down price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i], Math.pow(data.getDownPrice(startT + t, i) - data.getExpectedDownPrice(startT + t), 2)
-						/ (nScenarios - 1));
+				left.addTerm(x[i], Math.pow(data.getDownPrice(t, i) - data.getExpectedDownPrice(t),2) / (nScenarios-1));
 			}
 			right = new LinExp(f[TYPE.IMBDOWNPOS.ordinal()][t], -1.0, f[TYPE.IMBDOWNNEG.ordinal()][t], stdimbdown[t]);
 			constraints.add(new Constraint(left, right, CMP.EQ, "DIDP"+t));
 			//Minimizing the error in the imbalance up price
 			left = new LinExp();
 			for(int i=0; i<totalScenarios; i++) {
-				left.addTerm(x[i],
-						Math.pow(data.getUpPrice(startT + t, i) - data.getExpectedUpPrice(startT + t), 2) / (nScenarios - 1));
+				left.addTerm(x[i], Math.pow(data.getUpPrice(t, i) - data.getExpectedUpPrice(t),2) / (nScenarios-1));
 			}
 			right = new LinExp(f[TYPE.IMBUPPOS.ordinal()][t], -1.0, f[TYPE.IMBUPNEG.ordinal()][t], stdimbup[t]);
 			constraints.add(new Constraint(left, right, CMP.EQ, "DIUP"+t));
@@ -179,9 +170,7 @@ public class ScenarioSelector extends MIP {
 
 	@Override
 	protected void initiliazeVars() {
-		x = new Variable[data.getNScenarios()];
-		for(int i=0;i<data.getNScenarios();i++)
-			x[i] = new Variable("x"+i, VarType.Binary);
+		x = (Variable[]) newVarArray("x", VarType.Binary, data.getNScenarios());
 		e = new Variable[typecount][nTimeSteps];
 		f = new Variable[typecount][nTimeSteps];
 		for(TYPE type: TYPE.values()) {
@@ -192,12 +181,15 @@ public class ScenarioSelector extends MIP {
 		}
 	}
 
+	@Override
+	public void printSolution() {}
+
 
 	@Override
-	public void writeSolution() {
+	public void writeSolution() throws SolverException {
 		List<Integer> selected = new ArrayList<Integer>(nScenarios);
 		for(int i=0; i<totalScenarios; i++) {
-			if (x[i].getSolution() > 0.8) selected.add(i);
+			if(x[i].getSolution() > 0.8) selected.add(i+1);
 		}
 		double[][] e = new double[typecount][nTimeSteps];
 		double[][] f = new double[typecount][nTimeSteps];
@@ -210,17 +202,31 @@ public class ScenarioSelector extends MIP {
 		selection.scenarios = selected.stream().mapToInt(i->i).toArray();
 		selection.e = e;
 		selection.f = f;
+	}
+	
+	public static PriceScenarioData getOptimalScenarios(ISolver solver, PriceScenarioData data, int nScenarios) {
+		ScenarioSelector selector = new ScenarioSelector(data, nScenarios);
+		try {
+			solver.build(selector);
+			solver.solve();
+		} catch (SolverException e) {
+			System.out.println("Error in selecting scenarios. Defaulting to random scenarios");
+			return data.getRandomSubset(nScenarios, Utils.random);
+		}
+		
+		return data.filter(selector.selection.scenarios);
+	}
+	
+	
 
-		if (!cache.containsKey(data.getNScenarios()))
-			cache.put(data.getNScenarios(), new HashMap<Integer, ScenarioSelection>());
-		cache.get(data.getNScenarios()).put(nScenarios, selection);
+	public class ScenarioSelection {
+		public int[] scenarios;
+		public double[][] e,f;
+		
+		public String toString() {
+			return Arrays.toString(scenarios) + "\n" + Arrays.deepToString(e) + "\n" + Arrays.deepToString(f);
+		}
 	}
 
-	public static void resetCache() {
-		cache = new HashMap<>();
-	}
-
-
-	@Override
-	public void printSolution() {}
 }
+

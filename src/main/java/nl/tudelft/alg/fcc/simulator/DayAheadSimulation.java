@@ -11,14 +11,15 @@ public class DayAheadSimulation {
 	public static Result run(Simulator simulator, ProblemConfiguration pConfig) throws SolverException, InvalidConfigurationException {
 		FlexibleLoadProblem problem = simulator.createProblem(pConfig, 0);
 		ResultChecker checker = simulator.createChecker(pConfig);
-		if(problem.getMarket().hasDayAhead()) {
+		if(problem.getMarket().hasDayAhead() && simulator.config.dayAheadSeperate) {
 			FlexibleLoadProblem daProblem = simulator.createProblem(pConfig, -12);
 			daProblem.getMarket().ignoreReserves();
 			simulator.solve(daProblem);
 			checker.setPreviousDecisions(daProblem.getVars());
 			problem.getMarket().fixDayAhead();
 			setVariables(daProblem, problem); //Copy the da data to the problem to be used for fixing
-		}	
+		} else if(!problem.getMarket().hasDayAhead())
+			problem.getMarket().ignoreDayAhead();
 		problem.getConfig().setFixedPTUs(0);
 		checker.getConfig().setFixedPTUs(0);
 		long start = System.nanoTime();

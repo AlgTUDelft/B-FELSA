@@ -3,7 +3,6 @@ package nl.tudelft.alg.fcc.solution.mip;
 import java.util.stream.IntStream;
 
 import nl.tudelft.alg.MipSolverCore.CMP;
-import nl.tudelft.alg.MipSolverCore.IMIPSolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.fcc.model.Loads;
@@ -54,8 +53,8 @@ public class Heuristic extends OptimalPriceModel {
 	}
 
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
-		super.writeSolution(solver);
+	public void writeSolution() throws SolverException {
+		super.writeSolution();
 		if(!getConfig().hasReserves()) return;
 		DecisionVariables d = problem.getVars();
 		Loads loads = getLoads();

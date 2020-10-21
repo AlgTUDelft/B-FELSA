@@ -13,12 +13,14 @@ import nl.tudelft.alg.fcc.solution.mip.DeterministicModel;
 import nl.tudelft.alg.fcc.solution.mip.Heuristic;
 import nl.tudelft.alg.fcc.solution.mip.LinApproxModel;
 import nl.tudelft.alg.fcc.solution.mip.StochasticModel;
+import nl.tudelft.alg.fcc.solution.mip.OptimalPriceModel;
 
 public enum SolverMap {
 	D(Direct.class),
 	CA(CurveApproxModel.class),
 	H(Heuristic.class),
 	IM(FastImbalanceModel.class),
+	OPT(OptimalPriceModel.class),
 	NM(LinApproxModel.class),
 	Sor(SortommeModel.class),
 	IRD(DeterministicModel.class),

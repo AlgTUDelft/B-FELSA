@@ -1,5 +1,6 @@
 package nl.tudelft.alg.fcc.solution;
 
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.fcc.model.Loads;
 import nl.tudelft.alg.fcc.model.Market;
 import nl.tudelft.alg.fcc.problem.DecisionVariables;
@@ -21,7 +22,7 @@ public class Direct implements ISolveModel {
 	}
 	
 	@Override
-	public void initialize() {}
+	public void initialize(ISolver solver) {}
 
 	/**
 	 * Solves the direct charging problem

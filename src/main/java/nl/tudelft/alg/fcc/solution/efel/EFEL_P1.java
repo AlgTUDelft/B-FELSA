@@ -1,6 +1,6 @@
 package nl.tudelft.alg.fcc.solution.efel;
 
-import nl.tudelft.alg.MipSolverCore.IMIPSolver;
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.MipSolverCore.MIP;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.fcc.model.Loads;
@@ -35,18 +35,18 @@ public class EFEL_P1 extends CompactStochasticModel {
 
 	//Write the model solution back to the problem instance - Those variables that belong to many EVs in a single cluster, only write the solution in the first EV or the eqEV
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
+	public void writeSolution() throws SolverException {
 		DecisionVariables d = new DecisionVariables(nLoads, nTimeSteps, getMarket().getNumberOfHours(), getMarket().getStartT(), getMarket().getPTU());
 		problem.setVars(d);
-		super.writeSolution(solver);
+		super.writeSolution();
 		d.printSolution(problem);
 		problem.setVars(new DecisionVariables(problem));
 		solveSubproblem(solver, d); 
 	}
 	
-	private void solveSubproblem(IMIPSolver solver, DecisionVariables d) throws SolverException {
+	private void solveSubproblem(ISolver solver, DecisionVariables d) throws SolverException {
 		MIP model = new EFEL_P2(problem, d, cluster);
-		model.initialize();
+		model.initialize(solver);
 		solver.build(model);
 		solver.save("mip.lp");
 		solver.solve();

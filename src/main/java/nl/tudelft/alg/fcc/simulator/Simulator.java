@@ -211,8 +211,11 @@ public class Simulator {
 	 * @throws SolverException when the solver cannot be instantiated
 	 */
 	public ISolver getSolver() throws SolverException {
-		if (config.model.equals("LR"))
-			return new LRSolver<FlexibleLoadProblem>(getMIPSolver());
+		if (config.model.equals("LR")) {
+			ISolver solver = new LRSolver<FlexibleLoadProblem>(getMIPSolver());
+			solver.setDebug(config.mipDebug);
+			return solver;
+		}
 		return getMIPSolver();
 	}
 
@@ -240,12 +243,14 @@ public class Simulator {
 		if (!model.isSolvable())
 			throw new InvalidConfigurationException("The configuration provided is invalid for this solution model ("+model.getClass().getSimpleName()+ ")");
 		if (model instanceof MIP || model instanceof LRModel) {
+			if(model instanceof MIP) ((MIP) model).setTimeLimit(config.mipTimeLimit);
+			else if(model instanceof LRModel) ((LRModel<?>) model).setTimeLimit(config.mipTimeLimit, config.subTimeLimit);
 			ISolver solver = getSolver();
 			buildModel(solver, model);
 			if (config.mipDebug) solver.save("mip.lp");
 			solver.solve();
 		} else if (model instanceof ISolveModel) {
-			model.initialize();
+			model.initialize(null);
 			((ISolveModel) model).solve();
 		}
 	}
@@ -258,10 +263,9 @@ public class Simulator {
 	 * @throws InvalidConfigurationException when the configuration is invalid
 	 */
 	private IModel buildModel(ISolver solver, IModel model) throws SolverException, InvalidConfigurationException {
-		model.initialize();
+		model.initialize(solver);
 		solver.build(model);
 		solver.setMipGap(config.mipGap);
-		solver.setTimeLimit(config.mipTimeLimit);
 		return model;
 	}
 

@@ -1,7 +1,6 @@
 package nl.tudelft.alg.fcc.solution.lr;
 
 import nl.tudelft.alg.MipSolverCore.CMP;
-import nl.tudelft.alg.MipSolverCore.IMIPSolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.MipSolverCore.VarType;
@@ -51,12 +50,12 @@ public class FlexibleLoadLRMaster extends CompactStochasticModel {
 
 	//Write the model solution back to the problem instance
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
+	public void writeSolution() throws SolverException {
 		double solution = 0;
 		solution = this.solution.getSolution();
 		step.setUPObj(solution);
-		if(step.getBestSolution()>solution || step.getiteration() == 1) {
-			super.writeSolution(solver);
+		if(step.getBestSolution()>solution || step.getIteration() == 0) {
+			super.writeSolution();
 			step.setBestSolution(solution);
 		}
 	}

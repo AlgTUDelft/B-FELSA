@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 import nl.tudelft.alg.MipSolverCore.CMP;
 import nl.tudelft.alg.MipSolverCore.Constraint;
 import nl.tudelft.alg.MipSolverCore.IMIPSolver;
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.MipSolverCore.LinExp;
 import nl.tudelft.alg.MipSolverCore.SolverException;
 import nl.tudelft.alg.MipSolverCore.VarType;
@@ -16,6 +17,7 @@ import nl.tudelft.alg.fcc.model.Market;
 import nl.tudelft.alg.fcc.model.PriceScenarioData;
 import nl.tudelft.alg.fcc.problem.DecisionVariables;
 import nl.tudelft.alg.fcc.problem.FlexibleLoadProblem;
+import nl.tudelft.alg.fcc.simulator.data.ScenarioSelector;
 import nl.tudelft.alg.fcc.utils.Utils;
 
 /**
@@ -26,7 +28,7 @@ import nl.tudelft.alg.fcc.utils.Utils;
 public class StochasticModel extends FlexibleLoadMIPcon {
 	static Random random;
 	protected Variable[][][] vd, vu; // is the up/down-ward reserve bid called? for every session, time step, per scenario,  binary
-	Variable[][][]  rcd, // the scheduled amount of downward reserve capacity while charging for every EV, per time step, per scenario, positive continuous
+	protected Variable[][][]  rcd, // the scheduled amount of downward reserve capacity while charging for every EV, per time step, per scenario, positive continuous
 					rcu, // the scheduled amount of upward reserve capacity while charging for every EV, per time step, per scenario, positive continuous
 					rdd, // the scheduled amount of downward reserve capacity while discharging for every EV, per time step, per scenario, positive continuous
 					rdu; // the scheduled amount of upward reserve capacity while discharging for every EV, per time step, per scenario, positive continuous
@@ -35,7 +37,6 @@ public class StochasticModel extends FlexibleLoadMIPcon {
 	public StochasticModel(FlexibleLoadProblem p) {
 		super(p);
 		loadModel = new StochasticLoadModel(getMarket());
-		selectSubsetOfScenarios();
 		if(getConfig().getClusterMethod().equalsIgnoreCase("per flexible load"))
 			clusterModel = new ClusterModelPerEV();
 		else if(getConfig().getClusterMethod().equalsIgnoreCase("per time step"))
@@ -52,12 +53,21 @@ public class StochasticModel extends FlexibleLoadMIPcon {
 		PriceScenarioData data = getMarket().getPricedata();
 		if (getConfig().randomScenarios())
 			data = data.getRandomSubset(nScenarios, Utils.random);
-		else {
+		else if (getConfig().getScenarioSelectionMethod().toLowerCase().equals("mip")){
+			data = ScenarioSelector.getOptimalScenarios(solver, data, nScenarios);
+		} else { // Fast forward select
 			data = data.reduceScenarioSet(getLoads(), getMarket().getPTU(), problem.getStartT(), nScenarios);
 		}
 		Market newMarket = new Market(getMarket(), data);
 		problem.setMarket(newMarket);
 		this.nScenarios = getMarket().getNScenarios();
+	}
+	
+	@Override
+	public void initialize(ISolver solver) {
+		this.solver = solver;
+		selectSubsetOfScenarios();
+		super.initialize(solver);
 	}
 
 	@Override
@@ -226,8 +236,8 @@ public class StochasticModel extends FlexibleLoadMIPcon {
 
 	//Write the model solution back to the problem instance
 	@Override
-	public void writeSolution(IMIPSolver solver) throws SolverException {
-		super.writeSolution(solver);
+	public void writeSolution() throws SolverException {
+		super.writeSolution();
 		DecisionVariables d = problem.getVars();
 		int nTFixed = problem.getMarket().getFixedPTUs();
 		boolean[][][] vd = (boolean[][][]) writeVarsBack(this.vd, boolean.class);

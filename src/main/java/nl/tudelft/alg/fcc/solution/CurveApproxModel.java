@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.IntStream;
 
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.fcc.model.Loads;
 import nl.tudelft.alg.fcc.model.Market;
 import nl.tudelft.alg.fcc.problem.DecisionVariables;
@@ -25,7 +26,7 @@ public class CurveApproxModel implements ISolveModel {
 	}
 	
 	@Override
-	public void initialize() {}
+	public void initialize(ISolver solver) {}
 	
 	/**
 	 * Combine two partial solutions (curves) into one solution

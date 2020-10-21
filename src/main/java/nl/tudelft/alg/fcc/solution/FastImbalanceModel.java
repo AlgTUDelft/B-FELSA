@@ -3,6 +3,7 @@ package nl.tudelft.alg.fcc.solution;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import nl.tudelft.alg.MipSolverCore.ISolver;
 import nl.tudelft.alg.fcc.model.Loads;
 import nl.tudelft.alg.fcc.model.Market;
 import nl.tudelft.alg.fcc.problem.DecisionVariables;
@@ -21,7 +22,7 @@ public class FastImbalanceModel implements ISolveModel {
 	}
 	
 	@Override
-	public void initialize() {}
+	public void initialize(ISolver solver) {}
 
 
 	
@@ -75,22 +76,24 @@ public class FastImbalanceModel implements ISolveModel {
 		DecisionVariables dec = problem.getVars();
 		Loads loads = problem.getLoads();
 		Market market = problem.getMarket();
-		double[]  imbprices = IntStream.range(0, problem.getNTimeSteps()).mapToDouble(t -> getExpectedPrice(t)).toArray();
-		int[] imbOrder = IntStream.range(0, imbprices.length).boxed()
-				.sorted((j, k) -> new Double(imbprices[j]).compareTo(imbprices[k]) ).mapToInt(j -> j).toArray();
-		for(int i=0; i<loads.getNLoads(); i++) {
-			int startT = loads.getStartT(i);
-			int endT = loads.getEndT(i);
-			double nChargingSessions = Math.min(Math.max(0, loads.getRequiredChargeAmount(i))
-					/ (loads.getMaximumChargingSpeed(i) * loads.getChargingEfficiency() * market.getPTU()), endT - startT);
-			int index = 0;
-			while(nChargingSessions > 0) {
-				while(index < imbOrder.length && (imbOrder[index] < startT || imbOrder[index] >= endT)) index++;
-				if(index == imbOrder.length) break;
-				double delta = Math.min(1.0, nChargingSessions);
-				dec.p[i][imbOrder[index]] = delta * loads.getMaximumChargingSpeed(i);
-				nChargingSessions -= delta;
-				index++;
+		if(market.considerImbalance()) {
+			double[]  imbprices = IntStream.range(0, problem.getNTimeSteps()).mapToDouble(t -> getExpectedPrice(t)).toArray();
+			int[] imbOrder = IntStream.range(0, imbprices.length).boxed()
+					.sorted((j, k) -> new Double(imbprices[j]).compareTo(imbprices[k]) ).mapToInt(j -> j).toArray();
+			for(int i=0; i<loads.getNLoads(); i++) {
+				int startT = loads.getStartT(i);
+				int endT = loads.getEndT(i);
+				double nChargingSessions = Math.min(Math.max(0, loads.getRequiredChargeAmount(i))
+						/ (loads.getMaximumChargingSpeed(i) * loads.getChargingEfficiency() * market.getPTU()), endT - startT);
+				int index = 0;
+				while(nChargingSessions > 0) {
+					while(index < imbOrder.length && (imbOrder[index] < startT || imbOrder[index] >= endT)) index++;
+					if(index == imbOrder.length) break;
+					double delta = Math.min(1.0, nChargingSessions);
+					dec.p[i][imbOrder[index]] = delta * loads.getMaximumChargingSpeed(i);
+					nChargingSessions -= delta;
+					index++;
+				}
 			}
 		}
 	}
@@ -119,6 +122,7 @@ public class FastImbalanceModel implements ISolveModel {
 
 	@Override
 	public boolean isSolvable() {
+		if(!problem.getMarket().considerImbalance()) return false;
 		return true;
 	}
 
