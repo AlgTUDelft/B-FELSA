@@ -1,4 +1,4 @@
-# B-FELSA v1.0.0 #
+# B-FELSA v1.1.0 #
 Author: Koos van der Linden, 
 Delft University of Technology   
 
