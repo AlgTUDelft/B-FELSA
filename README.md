@@ -7,7 +7,7 @@ Other contributors: Mathijs de Weerdt, Natalia Romero, Germán Morales-España
 B-FELSA is a framework for benchmarking flexible electric load scheduling algorithms.
 If you use this framework, please cite the following paper:
 
-Koos van der Linden and Natalia Romero and Mathijs M. de Weerdt (2020). [Benchmarking Flexible Electric Loads Scheduling Algorithms under Market Price Uncertainty](https://arxiv.org/abs/2002.01246), _arXiv_ 2002.01246. 
+Koos van der Linden and Natalia Romero and Mathijs M. de Weerdt (2021). [Benchmarking Flexible Electric Loads Scheduling Algorithms](https://doi.org/10.3390/en14051269), _Energies_ 2021, 14(5), 1269.
 
 ## Solution methods ##
 The framework contains a number of solution methods as explained in the mentioned paper. All solution methods are found in [this folder](src/main/java/nl/tudelft/alg/fcc/solution). The solution methods included are:
